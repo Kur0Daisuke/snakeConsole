@@ -1,7 +1,15 @@
 var readline = require('readline');
-const highscores = require("./highscore.json")
-const { writeFileSync  } = require('fs');
-console.log(highscores)
+const { writeFileSync, open } = require('fs');
+
+var highscores;
+open('./highscore.json', 'r+', function (err, f) {
+    if (err) {
+        open('./highscore.json', "w", (err) => console.error(err))
+        writeFileSync("./highscore.json", JSON.stringify({scores:[]}, null, 2), 'utf8');
+    }
+    highscores = require("./highscore.json")
+})
+
 
 readline.emitKeypressEvents(process.stdin);
 
