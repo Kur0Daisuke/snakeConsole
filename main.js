@@ -42,8 +42,26 @@ var fruit = {
 }
 var score = 0;
 var startTime = new Date().getTime() / 1000;
+var started = false;
+var running;
+
+function start() {
+    clearInterval(running)
+    console.log("press any key that doesn't have a function")
+    started = false;
+    player.x = 1;
+    player.y = 1;
+    player.dx = 0;
+    player.dy = 1;
+}
 
 process.stdin.on('keypress', (chunk, key) => {
+    if(!started) {
+        started = true;
+        running = setInterval(() => {
+            Update()
+        }, 300)                    
+    }
     if (key && key.name == 'q') process.exit();
     else {
         switch (key.name) {
@@ -62,6 +80,9 @@ process.stdin.on('keypress', (chunk, key) => {
             case "w":
                 player.dx = 0;
                 player.dy = -1;
+                break;
+            case "r":
+                start()
                 break;
         }
     }
@@ -82,10 +103,9 @@ const getEmoji = (d) => {
     }
 }
 
-const end = ()=> {
-    // END
-        console.clear()
-        clearInterval(running)
+const DrawEndScreen = () => {
+    console.clear()
+        
         console.log("                               ")
         console.log("                               ")
         console.log("                               ")
@@ -95,26 +115,40 @@ const end = ()=> {
         console.log("                               ")
         console.log("                               ")
         console.log("                               ")
-    var endTime = new Date().getTime() / 1000;
-    highscores.scores.push({score, time: endTime-startTime})
+    
     for (var i = 0; i < highscores.scores.length; i++) {
         if(highscores.scores[i].score < score) {
             console.log("         new highscore!         ")
             break;
         }
     }
-    console.log("          scores          ")
+    console.log(" i  |    scores          ")
+    console.log("__________________________")
     for (var i = 0; i < highscores.scores.length; i++) {
-        if(i == highscores.scores.length-1) console.log(` ${i+1} |  score ${highscores.scores[i].score}  -  ${Math.floor(highscores.scores[i].time)} seconds <--- current score`)
-            else console.log(` ${i+1} |  score ${highscores.scores[i].score}  -  ${Math.floor(highscores.scores[i].time)} seconds`)
+        if(i == highscores.scores.length-1) console.log(` ${i+1}  |  score ${highscores.scores[i].score}     |  ${Math.floor(highscores.scores[i].time)} seconds <--- current score`)
+            else console.log(` ${i+1}  |  score ${highscores.scores[i].score}     |  ${Math.floor(highscores.scores[i].time)} seconds`)
     }
+    console.log("\n");
+    console.log("press r to restart.");
+    console.log("press q to quit.");
+}
+
+const end = ()=> {
+    // END
+    clearInterval(running)
+    var endTime = new Date().getTime() / 1000;
+    highscores.scores.push({score, time: endTime-startTime})
+    
+    running = setInterval(() => {
+        DrawEndScreen();
+    }, 500)
+        
     try {
         writeFileSync("./highscore.json", JSON.stringify(highscores, null, 2), 'utf8');
     } catch (error) {
         console.log('An error has occurred saving scores ', error);
     }
-    process.exit()
-
+    
 
 }
 
@@ -203,6 +237,4 @@ function Update() {
     
 }
 
-var running = setInterval(() => {
-    Update()
-}, 300)
+start()
